@@ -71,13 +71,14 @@ Public Class Form1
                     dataAdapterDestination.Update(dataTable)
                 End Using
 
-                '  MessageBox.Show($"Table '{tableName}' copied successfully.")
+
 
                 ' Close connections.
                 sourceConnection.Close()
                 destinationConnection.Close()
             End Using
         End Using
+
     End Sub
 
     Private Function GetTableColumns(dataTable As DataTable) As String
@@ -112,7 +113,8 @@ Public Class Form1
         End Select
     End Function
 
-
-
-
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        table_get()
+        MessageBox.Show(" successfully.")
+    End Sub
 End Class
