@@ -40,9 +40,9 @@ Public Class Form1
     End Sub
     Private Sub CopyTableButton(ByVal tableName As String)
         On Error Resume Next
-        ' Use the source and destination database paths defined in Button1_Click.
-        Dim sourceDatabasePath As String = "D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL"
-        Dim destinationDatabasePath As String = "D:\TECH LAB SYSTEM\tet\1.accdb"
+        ' Use the source and destination database paths defined in Button1_Click.Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;
+        Dim sourceDatabasePath As String = "D:\TECH LAB SYSTEM\Data\updata.SQL"
+        Dim destinationDatabasePath As String = "D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL"
 
         Dim connectionStringSource As String = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={sourceDatabasePath}"
         Dim connectionStringDestination As String = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={destinationDatabasePath}"
