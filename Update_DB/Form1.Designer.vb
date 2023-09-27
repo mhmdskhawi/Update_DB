@@ -27,21 +27,33 @@ Partial Class Form1
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(99, 86)
+        Me.Button1.BackColor = System.Drawing.SystemColors.Highlight
+        Me.Button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.Button1.Font = New System.Drawing.Font("VIP Hala Bold", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Button1.ForeColor = System.Drawing.Color.White
+        Me.Button1.Location = New System.Drawing.Point(110, 163)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(190, 61)
+        Me.Button1.Size = New System.Drawing.Size(190, 53)
         Me.Button1.TabIndex = 0
-        Me.Button1.Text = "Button1"
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.Button1.Text = "Update SQL"
+        Me.Button1.UseVisualStyleBackColor = False
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(406, 291)
+        Me.BackgroundImage = Global.Update_DB.My.Resources.Resources.TECH
+        Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
+        Me.ClientSize = New System.Drawing.Size(406, 217)
         Me.Controls.Add(Me.Button1)
+        Me.DoubleBuffered = True
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+        Me.MaximumSize = New System.Drawing.Size(422, 256)
+        Me.MinimumSize = New System.Drawing.Size(422, 256)
         Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "Update SQL"
+        Me.TopMost = True
         Me.ResumeLayout(False)
 
     End Sub

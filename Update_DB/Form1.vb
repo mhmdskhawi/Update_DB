@@ -2,13 +2,7 @@
 Imports System.Text
 
 Public Class Form1
-    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-    End Sub
-
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-
-    End Sub
 
     Sub table_get()
         Dim connectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
