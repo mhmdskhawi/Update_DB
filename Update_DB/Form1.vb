@@ -124,8 +124,8 @@ Public Class Form1
                 Return "DOUBLE"
             Case TypeCode.Decimal
                 Return "DECIMAL"
-            Case TypeCode.Int32
-                Return "INTEGER"
+            Case TypeCode.Boolean
+                Return "YESNO"
             Case TypeCode.DateTime
                 Return "DATETIME"
             Case Else
@@ -173,11 +173,11 @@ Public Class Form1
             ' Iterate through the columns and create ALTER TABLE statements
             For Each row As DataRow In schemaTable.Rows
                 Dim columnName As String = row("COLUMN_NAME").ToString()
-                Dim dataType As Type = row("DATA_TYPE").GetType
+                Dim dataType = row("DATA_TYPE").ToString
                 Dim size As Integer = If(row("CHARACTER_MAXIMUM_LENGTH") IsNot DBNull.Value, CInt(row("CHARACTER_MAXIMUM_LENGTH")), -1)
 
                 ' Create ALTER TABLE statement based on the column information
-                Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataType(dataType)};"
+                Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataTypes(dataType, size)};"
                 Try
                     ' Execute the ALTER TABLE statement on the destination database
                     Using command As New OleDbCommand(alterTableSql, destinationConnection)
@@ -185,7 +185,7 @@ Public Class Form1
                     End Using
 
 
-                    value = tableName & "->" & columnName
+                    value = tableName & $"({dataType.ToString})" & "->" & columnName & "->" & GetAccessDataTypes(dataType, size)
                     If value IsNot Nothing Then
                         ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
                         If Me.InvokeRequired Then
@@ -210,6 +210,27 @@ Public Class Form1
             Next
         End Using
     End Sub
+    Function GetAccessDataTypes(ByVal dataType As Integer, ByVal size As Integer) As String
+
+
+        Select Case dataType
+            Case 11 ' OleDbType.Boolean
+                Return "YESNO"
+            Case 3 ' OleDbType.Integer
+                Return "LONG"
+            Case 130 ' OleDbType.String
+                Return If(size = -1, "MEMO", $"VARCHAR({size})")
+            Case 4 ' OleDbType.Double
+                Return "DOUBLE"
+            Case 5 ' OleDbType.Currency
+                Return "CURRENCY"
+            Case 7 ' OleDbType.DateTime
+                Return "DATETIME"
+                ' Add more cases as needed for other data types
+            Case Else
+                Return "TEXT"
+        End Select
+    End Function
 
     Private Sub UpdateTextOnUIThread(value As String)
         ' Update the TextBox text here
