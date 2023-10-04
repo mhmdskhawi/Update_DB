@@ -3,8 +3,8 @@ Imports System.Text
 
 Public Class Form1
     Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
-    Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL;"
-
+    Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.mdb;"
+    Dim value
 
     Sub table_get(ByVal ins)
         Dim connectionString As String = sourceConnectionString
@@ -28,6 +28,16 @@ Public Class Form1
                         If ins = 1 Then
                             CopyTableButton(tableName)
                         Else
+
+                            value = "---------" & tableName & "----------"
+                            If value IsNot Nothing Then
+                                ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
+                                If Me.InvokeRequired Then
+                                    Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread), value)
+                                Else
+                                    UpdateTextOnUIThread(value)
+                                End If
+                            End If
                             updatetaple(tableName)
                         End If
                     End If
@@ -124,7 +134,7 @@ Public Class Form1
     End Sub
 
     Sub updatetaple(ByVal tableName)
-        On Error Resume Next
+        ' On Error Resume Next
         ' Connection strings for the source and destination databases
 
 
@@ -148,15 +158,48 @@ Public Class Form1
 
                 ' Create ALTER TABLE statement based on the column information
                 Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataType(dataType)};"
+                Try
+                    ' Execute the ALTER TABLE statement on the destination database
+                    Using command As New OleDbCommand(alterTableSql, destinationConnection)
+                        command.ExecuteNonQuery()
+                    End Using
 
-                ' Execute the ALTER TABLE statement on the destination database
-                Using command As New OleDbCommand(alterTableSql, destinationConnection)
-                    command.ExecuteNonQuery()
-                End Using
+
+                    value = tableName & "->" & columnName
+                    If value IsNot Nothing Then
+                        ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
+                        If Me.InvokeRequired Then
+                            Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread), value)
+                        Else
+                            UpdateTextOnUIThread(value)
+                        End If
+                    End If
+                Catch ex As Exception
+
+                    value = ex.Message
+                    If value IsNot Nothing Then
+                        ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
+                        If Me.InvokeRequired Then
+                            Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread), value)
+                        Else
+                            UpdateTextOnUIThread(value)
+                        End If
+                    End If
+                End Try
+
             Next
         End Using
     End Sub
 
+    Private Sub UpdateTextOnUIThread(value As String)
+        ' Update the TextBox text here
+        RichTextBox1.AppendText(vbCrLf & value)
+        ' Set the SelectionStart to the end of the text
+        RichTextBox1.SelectionStart = RichTextBox1.Text.Length
+
+        ' Scroll to the end to show the last text added
+        RichTextBox1.ScrollToCaret()
+    End Sub
     ' Function to map Access data types to equivalent VB.NET data types
 
 
