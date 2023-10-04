@@ -24,6 +24,7 @@ Partial Class Form1
     Private Sub InitializeComponent()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.RichTextBox2 = New System.Windows.Forms.RichTextBox()
         Me.SuspendLayout()
         '
         'Button1
@@ -32,7 +33,7 @@ Partial Class Form1
         Me.Button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.Button1.Font = New System.Drawing.Font("VIP Hala Bold", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Button1.ForeColor = System.Drawing.Color.White
-        Me.Button1.Location = New System.Drawing.Point(110, 12)
+        Me.Button1.Location = New System.Drawing.Point(107, 12)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(190, 53)
         Me.Button1.TabIndex = 0
@@ -44,11 +45,24 @@ Partial Class Form1
         Me.RichTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None
         Me.RichTextBox1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.RichTextBox1.Font = New System.Drawing.Font("Tahoma", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RichTextBox1.Location = New System.Drawing.Point(0, 160)
+        Me.RichTextBox1.ForeColor = System.Drawing.Color.Red
+        Me.RichTextBox1.Location = New System.Drawing.Point(0, 410)
         Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.Size = New System.Drawing.Size(406, 57)
+        Me.RichTextBox1.Size = New System.Drawing.Size(402, 68)
         Me.RichTextBox1.TabIndex = 1
         Me.RichTextBox1.Text = "TEST"
+        '
+        'RichTextBox2
+        '
+        Me.RichTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.RichTextBox2.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.RichTextBox2.Font = New System.Drawing.Font("Tahoma", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.RichTextBox2.ForeColor = System.Drawing.Color.Blue
+        Me.RichTextBox2.Location = New System.Drawing.Point(0, 353)
+        Me.RichTextBox2.Name = "RichTextBox2"
+        Me.RichTextBox2.Size = New System.Drawing.Size(402, 57)
+        Me.RichTextBox2.TabIndex = 2
+        Me.RichTextBox2.Text = "TEST"
         '
         'Form1
         '
@@ -56,13 +70,12 @@ Partial Class Form1
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackgroundImage = Global.Update_DB.My.Resources.Resources.TECH
         Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.ClientSize = New System.Drawing.Size(406, 217)
+        Me.ClientSize = New System.Drawing.Size(402, 478)
+        Me.Controls.Add(Me.RichTextBox2)
         Me.Controls.Add(Me.RichTextBox1)
         Me.Controls.Add(Me.Button1)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
-        Me.MaximumSize = New System.Drawing.Size(422, 256)
-        Me.MinimumSize = New System.Drawing.Size(422, 256)
         Me.Name = "Form1"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Update SQL"
@@ -73,4 +86,5 @@ Partial Class Form1
 
     Friend WithEvents Button1 As Button
     Friend WithEvents RichTextBox1 As RichTextBox
+    Friend WithEvents RichTextBox2 As RichTextBox
 End Class

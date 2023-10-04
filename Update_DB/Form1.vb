@@ -3,7 +3,7 @@ Imports System.Text
 
 Public Class Form1
     Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
-    Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.mdb;"
+    Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL;"
     Dim value
 
     Sub table_get(ByVal ins)
@@ -30,6 +30,14 @@ Public Class Form1
                         Else
 
                             value = "---------" & tableName & "----------"
+                            If value IsNot Nothing Then
+                                ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
+                                If Me.InvokeRequired Then
+                                    Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread2), value)
+                                Else
+                                    UpdateTextOnUIThread2(value)
+                                End If
+                            End If
                             If value IsNot Nothing Then
                                 ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
                                 If Me.InvokeRequired Then
@@ -141,10 +149,22 @@ Public Class Form1
         ' Open connections
         Using sourceConnection As New OleDbConnection(sourceConnectionString),
               destinationConnection As New OleDbConnection(destinationConnectionString)
+            Try
+                ' Open the connections
+                sourceConnection.Open()
+                destinationConnection.Open()
+            Catch ex As Exception
+                value = ex.Message
+                If value IsNot Nothing Then
+                    ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
+                    If Me.InvokeRequired Then
+                        Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread), value)
+                    Else
+                        UpdateTextOnUIThread(value)
+                    End If
+                End If
+            End Try
 
-            ' Open the connections
-            sourceConnection.Open()
-            destinationConnection.Open()
 
             ' Retrieve schema information for the "Web_visit" table from the source database
             Dim schemaTable As DataTable = sourceConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Columns,
@@ -169,9 +189,9 @@ Public Class Form1
                     If value IsNot Nothing Then
                         ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
                         If Me.InvokeRequired Then
-                            Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread), value)
+                            Me.Invoke(New Action(Of String)(AddressOf UpdateTextOnUIThread2), value)
                         Else
-                            UpdateTextOnUIThread(value)
+                            UpdateTextOnUIThread2(value)
                         End If
                     End If
                 Catch ex As Exception
@@ -199,6 +219,15 @@ Public Class Form1
 
         ' Scroll to the end to show the last text added
         RichTextBox1.ScrollToCaret()
+    End Sub
+    Private Sub UpdateTextOnUIThread2(value As String)
+        ' Update the TextBox text here
+        RichTextBox2.AppendText(vbCrLf & value)
+        ' Set the SelectionStart to the end of the text
+        RichTextBox2.SelectionStart = RichTextBox2.Text.Length
+
+        ' Scroll to the end to show the last text added
+        RichTextBox2.ScrollToCaret()
     End Sub
     ' Function to map Access data types to equivalent VB.NET data types
 
