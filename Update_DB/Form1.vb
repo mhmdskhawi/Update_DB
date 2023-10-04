@@ -2,10 +2,12 @@
 Imports System.Text
 
 Public Class Form1
+    Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
+    Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL;"
 
 
-    Sub table_get()
-        Dim connectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
+    Sub table_get(ByVal ins)
+        Dim connectionString As String = sourceConnectionString
 
 
         '  Dim connectionString As String = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source={databasePath}"
@@ -23,8 +25,11 @@ Public Class Form1
                     Dim tableName As String = row("TABLE_NAME").ToString()
                     ' You might want to filter out system tables like "MSys...".
                     If Not tableName.StartsWith("MSys", StringComparison.OrdinalIgnoreCase) Then
-
-                        CopyTableButton(tableName)
+                        If ins = 1 Then
+                            CopyTableButton(tableName)
+                        Else
+                            updatetaple(tableName)
+                        End If
                     End If
                 Next
             End If
@@ -35,14 +40,9 @@ Public Class Form1
     Private Sub CopyTableButton(ByVal tableName As String)
         On Error Resume Next
         ' Use the source and destination database paths defined in Button1_Click.Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;
-        Dim sourceDatabasePath As String = "D:\TECH LAB SYSTEM\Data\updata.SQL"
-        Dim destinationDatabasePath As String = "D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL"
 
-        Dim connectionStringSource As String = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={sourceDatabasePath}"
-        Dim connectionStringDestination As String = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={destinationDatabasePath}"
-
-        Using sourceConnection As New OleDbConnection(connectionStringSource)
-            Using destinationConnection As New OleDbConnection(connectionStringDestination)
+        Using sourceConnection As New OleDbConnection(sourceConnectionString)
+            Using destinationConnection As New OleDbConnection(destinationConnectionString)
                 sourceConnection.Open()
                 destinationConnection.Open()
 
@@ -95,7 +95,7 @@ Public Class Form1
         Return columnString.ToString()
     End Function
 
-    Private Function GetAccessDataType(dataType As Type) As String
+    Function GetAccessDataType(dataType As Type) As String
         ' Map .NET data types to Access data types.
         Select Case Type.GetTypeCode(dataType)
             Case TypeCode.String
@@ -106,6 +106,8 @@ Public Class Form1
                 Return "DOUBLE"
             Case TypeCode.Decimal
                 Return "DECIMAL"
+            Case TypeCode.Int32
+                Return "INTEGER"
             Case TypeCode.DateTime
                 Return "DATETIME"
             Case Else
@@ -114,7 +116,49 @@ Public Class Form1
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        table_get()
-        MessageBox.Show(" successfully.")
+        table_get(1)
+
+        MessageBox.Show(" successfully. insert First Step ")
+        table_get(2)
+        MessageBox.Show(" successfully. Done !")
     End Sub
+
+    Sub updatetaple(ByVal tableName)
+        On Error Resume Next
+        ' Connection strings for the source and destination databases
+
+
+        ' Open connections
+        Using sourceConnection As New OleDbConnection(sourceConnectionString),
+              destinationConnection As New OleDbConnection(destinationConnectionString)
+
+            ' Open the connections
+            sourceConnection.Open()
+            destinationConnection.Open()
+
+            ' Retrieve schema information for the "Web_visit" table from the source database
+            Dim schemaTable As DataTable = sourceConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Columns,
+                New Object() {Nothing, Nothing, $"{tableName}", Nothing})
+
+            ' Iterate through the columns and create ALTER TABLE statements
+            For Each row As DataRow In schemaTable.Rows
+                Dim columnName As String = row("COLUMN_NAME").ToString()
+                Dim dataType As Type = row("DATA_TYPE").GetType
+                Dim size As Integer = If(row("CHARACTER_MAXIMUM_LENGTH") IsNot DBNull.Value, CInt(row("CHARACTER_MAXIMUM_LENGTH")), -1)
+
+                ' Create ALTER TABLE statement based on the column information
+                Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataType(dataType)};"
+
+                ' Execute the ALTER TABLE statement on the destination database
+                Using command As New OleDbCommand(alterTableSql, destinationConnection)
+                    command.ExecuteNonQuery()
+                End Using
+            Next
+        End Using
+    End Sub
+
+    ' Function to map Access data types to equivalent VB.NET data types
+
+
+
 End Class
