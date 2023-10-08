@@ -2,7 +2,7 @@
 Imports System.Text
 
 Public Class Form1
-    Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.SQL;"
+    Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.accdb;"
     Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL;"
     Dim value
 
@@ -119,7 +119,11 @@ Public Class Form1
             Case TypeCode.String
                 Return "TEXT"
             Case TypeCode.Int32
-                Return "LONG"
+                If isAutoIncrement Then
+                    Return "COUNTER"
+                Else
+                    Return "LONG"
+                End If
             Case TypeCode.Double
                 Return "DOUBLE"
             Case TypeCode.Decimal
@@ -217,7 +221,11 @@ Public Class Form1
             Case 11 ' OleDbType.Boolean
                 Return "YESNO"
             Case 3 ' OleDbType.Integer
-                Return "LONG"
+                If isAutoIncrement Then
+                    Return "COUNTER"
+                Else
+                    Return "LONG"
+                End If
             Case 130 ' OleDbType.String
                 Return If(size = -1, "MEMO", $"VARCHAR({size})")
             Case 4 ' OleDbType.Double
