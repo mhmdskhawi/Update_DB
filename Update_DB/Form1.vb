@@ -5,7 +5,7 @@ Public Class Form1
     Dim sourceConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\updata.accdb;"
     Dim destinationConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\TECH LAB SYSTEM\Data\Online Data - PROLAB.SQL;"
     Dim value
-
+    Dim schemaTables As DataTable
     Sub table_get(ByVal ins)
         Dim connectionString As String = sourceConnectionString
 
@@ -14,6 +14,7 @@ Public Class Form1
 
         Using connection As New OleDbConnection(connectionString)
             connection.Open()
+            schemaTables = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Columns, New Object() {Nothing, Nothing, tableNames, Nothing})
 
             ' Get the DataTable that contains information about the tables in the database.
             Dim schemaTable As DataTable = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, Nothing)
@@ -77,7 +78,7 @@ Public Class Form1
                 dataAdapter.Fill(dataTable)
 
                 ' Create a new table in the destination database.
-                Dim createTableCommand As New OleDbCommand($"CREATE TABLE [{tableName}] ({GetTableColumns(dataTable)})", destinationConnection)
+                Dim createTableCommand As New OleDbCommand($"CREATE TABLE [{tableName}] ", destinationConnection)
 
                 createTableCommand.ExecuteNonQuery()
 
@@ -100,26 +101,52 @@ Public Class Form1
     End Sub
 
     Private Function GetTableColumns(dataTable As DataTable) As String
+        ' On Error Resume Next
         ' Build a string representing the columns and their data types.
+
         Dim columnString As New StringBuilder()
+        Dim isAutoIncrements As Boolean = False
+
 
         For Each column As DataColumn In dataTable.Columns
-            columnString.Append($"[{column.ColumnName}] {GetAccessDataType(column.DataType)}, ")
+
+            isAutoIncrement = IsAutoIncrementColumn(schemaTable, tableName, column.ColumnName)
+
+
+            columnString.Append($"[{column.ColumnName}] {GetAccessDataType(column.DataType, isAutoIncrements)}, ")
+
         Next
 
-        ' Remove the trailing comma and space.
-        columnString.Length -= 2
+        If columnString.Length > 2 Then
+            columnString.Length -= 2
+        End If
 
         Return columnString.ToString()
-    End Function
 
-    Function GetAccessDataType(dataType As Type) As String
+
+    End Function
+    Private Function IsAutoIncrementColumn(schemaTable As DataTable, tableName As String, columnName As String) As Boolean
+        ' Iterate through the schema table to find information about the specified column
+        For Each row As DataRow In schemaTable.Rows
+            If String.Equals(row("TABLE_NAME").ToString(), tableName, StringComparison.OrdinalIgnoreCase) AndAlso
+               String.Equals(row("COLUMN_NAME").ToString(), columnName, StringComparison.OrdinalIgnoreCase) Then
+
+                ' Check the COLUMN_FLAGS to determine if it's an auto-increment column
+                Dim columnFlags As Integer = CInt(row("COLUMN_FLAGS"))
+                Return (columnFlags And &H10) = &H10  ' Check the auto-increment flag (bit 4)
+            End If
+        Next
+
+        ' Column not found or not auto-increment
+        Return False
+    End Function
+    Function GetAccessDataType(dataType As Type, isAutoIncrementd As Boolean) As String
         ' Map .NET data types to Access data types.
         Select Case Type.GetTypeCode(dataType)
             Case TypeCode.String
                 Return "TEXT"
             Case TypeCode.Int32
-                If isAutoIncrement Then
+                If isAutoIncrementd Then
                     Return "COUNTER"
                 Else
                     Return "LONG"
@@ -179,9 +206,17 @@ Public Class Form1
                 Dim columnName As String = row("COLUMN_NAME").ToString()
                 Dim dataType = row("DATA_TYPE").ToString
                 Dim size As Integer = If(row("CHARACTER_MAXIMUM_LENGTH") IsNot DBNull.Value, CInt(row("CHARACTER_MAXIMUM_LENGTH")), -1)
+                Dim columnFlags As Integer = CInt(row("COLUMN_FLAGS"))
+
+                ' Check if the column is auto-increment
+                Dim isAutoIncrement As Boolean = (columnFlags And &H10) = &H10
+
+                ' Check if the column is a primary key
+                Dim isPrimaryKey As Boolean = (columnFlags And &H2) = &H2
+
 
                 ' Create ALTER TABLE statement based on the column information
-                Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataTypes(dataType, size)};"
+                Dim alterTableSql As String = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {GetAccessDataTypes(dataType, size, isAutoIncrement)};"
                 Try
                     ' Execute the ALTER TABLE statement on the destination database
                     Using command As New OleDbCommand(alterTableSql, destinationConnection)
@@ -189,7 +224,7 @@ Public Class Form1
                     End Using
 
 
-                    value = tableName & $"({dataType.ToString})" & "->" & columnName & "->" & GetAccessDataTypes(dataType, size)
+                    value = tableName & $"({dataType.ToString})" & "->" & columnName & "->" & GetAccessDataTypes(dataType, size, isAutoIncrement) & $",{isAutoIncrement}"
                     If value IsNot Nothing Then
                         ' قم بتحديث النص في TextBox باستخدام القيمة الممررة
                         If Me.InvokeRequired Then
@@ -214,7 +249,7 @@ Public Class Form1
             Next
         End Using
     End Sub
-    Function GetAccessDataTypes(ByVal dataType As Integer, ByVal size As Integer) As String
+    Function GetAccessDataTypes(ByVal dataType As Integer, ByVal size As Integer, ByVal isAutoIncrement As Boolean) As String
 
 
         Select Case dataType
@@ -222,7 +257,7 @@ Public Class Form1
                 Return "YESNO"
             Case 3 ' OleDbType.Integer
                 If isAutoIncrement Then
-                    Return "COUNTER"
+                    Return "COUNTER PRIMARY KEY"
                 Else
                     Return "LONG"
                 End If
